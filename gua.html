@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>刮刮乐</title>
+</head>
+<body>
+  <canvas id="mask" width="400" height="300"></canvas>
+  <script>
+    var mask = document.getElementById("mask")
+    var ctx = mask.getContext('2d')
+    var isDraw = false
+
+    // 画蒙版
+    ctx.beginPath()
+    ctx.fillStyle = 'grey'
+    ctx.fillRect(0, 0, 400, 300)
+    // 开始刮
+    mask.onmousedown = function () {
+      mask.onmousemove = function (event) {
+        if (isDraw) {
+          return
+        }
+        var x = event.clientX
+        var y = event.clientY
+        ctx.globalCompositeOperation = 'destination-out'
+        ctx.beginPath()
+        ctx.arc(x, y, 20, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+    // 停止
+    mask.onmouseup = function () {
+      mask.onmousemove = function () {
+        isDraw = false
+      }
+    }
+  </script>
+</body>
+</html>
