@@ -1,40 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <head>
   <meta charset="UTF-8">
-  <title>刮刮乐</title>
+  <title>lottery</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
 </head>
 <body>
-  <canvas id="mask" width="400" height="300"></canvas>
+  <canvas id="mask" width="375" height="150"></canvas>
   <script>
     var mask = document.getElementById("mask")
     var ctx = mask.getContext('2d')
-    var isDraw = false
-
-    // 画蒙版
+    
     ctx.beginPath()
     ctx.fillStyle = 'grey'
     ctx.fillRect(0, 0, 400, 300)
-    // 开始刮
-    mask.onmousedown = function () {
-      mask.onmousemove = function (event) {
-        if (isDraw) {
-          return
+
+    mask.addEventListener('touchstart', onTouchStart, false)
+    mask.addEventListener('touchmove', onTouchMove, false)
+    mask.addEventListener('touchend', onTouchEnd, false)
+    document.addEventListener('touchend', onTouchEnd, false)
+
+    function onTouchStart (event) {
+      // console.log(event)
+    }
+
+    function onTouchMove (ev) {
+      // 修改手机端默认的缩放行为
+      ev.preventDefault()
+      if (ev.changedTouches) {
+        ev = ev.changedTouches[ev.changedTouches.length - 1]
+      }
+      var x = ev.clientX
+      var y = ev.clientY
+      ctx.globalCompositeOperation = 'destination-out'
+      ctx.beginPath()
+      ctx.arc(x, y, 15, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    function onTouchEnd (ev) {
+      // 大于一半显示结果
+      if (scratchPercent() > 50) {
+        setResult ('./gailun.jpg')
+      }
+    }
+
+    function setResult (url) {
+      console.log('in', ctx)
+      mask.style.backgroundImage = 'url(' + url + ')' // 设置结果
+      mask.style.backgroundRepeat = 'no-repeat'
+    }
+
+    function scratchPercent () {
+      var imageData = ctx.getImageData(0, 0, 375, 150)
+      let hits = 0
+
+      for (let i = 0, ii = imageData.data.length; i < ii; i = i + 4) {
+        if (imageData.data[i] === 0 && imageData.data[i + 1] === 0 && imageData.data[i + 2] === 0 && imageData.data[i + 3] === 0) {
+          hits++
         }
-        var x = event.clientX
-        var y = event.clientY
-        ctx.globalCompositeOperation = 'destination-out'
-        ctx.beginPath()
-        ctx.arc(x, y, 20, 0, Math.PI * 2)
-        ctx.fill()
       }
+
+      console.log(hits)
+      return (hits / (375 * 150)) * 100
     }
-    // 停止
-    mask.onmouseup = function () {
-      mask.onmousemove = function () {
-        isDraw = false
-      }
-    }
+
+
+
   </script>
 </body>
 </html>
